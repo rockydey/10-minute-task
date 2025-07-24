@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/react-query";
 import { fetchProductData } from "./_api/api";
-import ProductClientPage from "./_components/ProductClientPage";
+import ProductClientPage from "./_components/product-client-page";
 
 export async function generateMetadata({
   params,

@@ -1,18 +1,16 @@
 "use client";
 
 import { useProductQuery } from "../_api/hooks";
+import Loading from "./loading";
 
 export default function ProductClientPage({ lang }: { lang: "en" | "bn" }) {
   const { data, isLoading } = useProductQuery(lang);
 
-  if (isLoading) return <p className="p-4">Loading...</p>;
-  if (!data) return <p className="p-4">No product data found</p>;
-
-  console.log(data);
+  if (isLoading) return <Loading />;
 
   return (
-    <div className="p-6 space-y-4">
+    <main>
       <h1>Hi</h1>
-    </div>
+    </main>
   );
 }

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import Header from "./_components/header";
 
 export default function LangLayout({
   children,
@@ -7,5 +8,10 @@ export default function LangLayout({
   children: ReactNode;
   params: { lang: "en" | "bn" };
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Header currentLang={params.lang} />
+      {children}
+    </>
+  );
 }
