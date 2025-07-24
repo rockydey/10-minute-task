@@ -3,4 +3,6 @@
 @theme {
   --spacing-container: 1384px;
   --spacing-content: 1168px;
+
+  --color-primary: #1cab55;
 }

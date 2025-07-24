@@ -2,39 +2,161 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface DesktopNavbarProps {
   nextLang: "bn" | "en";
   switchLang: () => void;
 }
 
+interface MenuItem {
+  title: string;
+  dropdown?: {
+    label: string;
+    icon: string;
+    color: string;
+  }[];
+}
+
+const menuItemsEn: MenuItem[] = [
+  {
+    title: "Class 6–12",
+    dropdown: [
+      { label: "HSC", icon: "H", color: "bg-rose-300" },
+      { label: "Class Ten", icon: "10", color: "bg-yellow-300" },
+      { label: "Class Nine", icon: "9", color: "bg-teal-300" },
+      { label: "Class Eight", icon: "8", color: "bg-orange-300" },
+      { label: "Class Seven", icon: "7", color: "bg-yellow-300" },
+      { label: "Class Six", icon: "6", color: "bg-blue-300" },
+    ],
+  },
+  {
+    title: "Skills",
+    dropdown: [
+      { label: "Web Dev", icon: "WD", color: "bg-green-300" },
+      { label: "Graphics", icon: "G", color: "bg-purple-300" },
+      { label: "Presentation", icon: "P", color: "bg-red-300" },
+    ],
+  },
+  {
+    title: "Admission",
+    // dropdown: [
+    //   { label: "Medical", icon: "M", color: "bg-indigo-300" },
+    //   { label: "Engineering", icon: "E", color: "bg-cyan-300" },
+    // ],
+  },
+  {
+    title: "Online Batch",
+    dropdown: [
+      { label: "Batch A", icon: "A", color: "bg-emerald-300" },
+      { label: "Batch B", icon: "B", color: "bg-sky-300" },
+    ],
+  },
+  {
+    title: "English Centre",
+    dropdown: [
+      { label: "IELTS", icon: "I", color: "bg-yellow-400" },
+      { label: "Spoken English", icon: "SE", color: "bg-pink-300" },
+    ],
+  },
+  {
+    title: "More",
+    dropdown: [
+      { label: "Books", icon: "B", color: "bg-gray-300" },
+      { label: "Support", icon: "S", color: "bg-red-200" },
+      { label: "Blog", icon: "BL", color: "bg-orange-200" },
+    ],
+  },
+];
+
+const menuItemsBn: MenuItem[] = [
+  {
+    title: "ষষ্ঠ - দ্বাদশ শ্রেণি",
+    dropdown: [
+      { label: "এইচএসসি", icon: "H", color: "bg-rose-300" },
+      { label: "দশম শ্রেণি", icon: "10", color: "bg-yellow-300" },
+      { label: "নবম শ্রেণি", icon: "9", color: "bg-teal-300" },
+      { label: "অষ্টম শ্রেণি", icon: "8", color: "bg-orange-300" },
+      { label: "সপ্তম শ্রেণি", icon: "7", color: "bg-yellow-300" },
+      { label: "ষষ্ঠ শ্রেণি", icon: "6", color: "bg-blue-300" },
+    ],
+  },
+  {
+    title: "স্কিলস",
+    dropdown: [
+      { label: "ওয়েব ডেভেলপমেন্ট", icon: "WD", color: "bg-green-300" },
+      { label: "গ্রাফিক্স ডিজাইন", icon: "G", color: "bg-purple-300" },
+      { label: "প্রেজেন্টেশন", icon: "P", color: "bg-red-300" },
+    ],
+  },
+  {
+    title: "ভর্তি",
+    // dropdown: [
+    //   { label: "মেডিকেল", icon: "M", color: "bg-indigo-300" },
+    //   { label: "ইঞ্জিনিয়ারিং", icon: "E", color: "bg-cyan-300" },
+    // ],
+  },
+  {
+    title: "অনলাইন ব্যাচ",
+    dropdown: [
+      { label: "ব্যাচ এ", icon: "A", color: "bg-emerald-300" },
+      { label: "ব্যাচ বি", icon: "B", color: "bg-sky-300" },
+    ],
+  },
+  {
+    title: "ইংলিশ সেন্টার",
+    dropdown: [
+      { label: "আইইএলটিএস", icon: "I", color: "bg-yellow-400" },
+      { label: "স্পোকেন ইংলিশ", icon: "SE", color: "bg-pink-300" },
+    ],
+  },
+  {
+    title: "আরও",
+    dropdown: [
+      { label: "বই", icon: "B", color: "bg-gray-300" },
+      { label: "সাপোর্ট", icon: "S", color: "bg-red-200" },
+      { label: "ব্লগ", icon: "BL", color: "bg-orange-200" },
+    ],
+  },
+];
+
 const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
-  const [isClassDropdownOpen, setIsClassDropdownOpen] = useState(false);
-  const [isSkillsDropdownOpen, setIsSkillsDropdownOpen] = useState(false);
-  const [isOnlineBatchDropdownOpen, setIsOnlineBatchDropdownOpen] =
-    useState(false);
-  const [isEnglishCentreDropdownOpen, setIsEnglishCentreDropdownOpen] =
-    useState(false);
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [visibleIndex, setVisibleIndex] = useState<number | null>(null);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
 
-  const classDropdownRef = useRef<HTMLDivElement>(null);
-  const skillsDropdownRef = useRef<HTMLDivElement>(null);
-  const onlineBatchDropdownRef = useRef<HTMLDivElement>(null);
-  const englishCentreDropdownRef = useRef<HTMLDivElement>(null);
-  const moreDropdownRef = useRef<HTMLDivElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
-  const classOptions = [
-    { id: "hsc", label: "HSC", color: "#ff6b6b" },
-    { id: "class-ten", label: "Class Ten", color: "#4ecdc4" },
-    { id: "class-nine", label: "Class Nine", color: "#45b7d1" },
-    { id: "class-eight", label: "Class Eight", color: "#f9ca24" },
-    { id: "class-seven", label: "Class Seven", color: "#f0932b" },
-    { id: "class-six", label: "Class Six", color: "#eb4d4b" },
-  ];
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchDropdownRef.current &&
+        !searchDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsSearchDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (timerId) clearTimeout(timerId);
+
+    if (hoveredIndex !== null) {
+      setVisibleIndex(hoveredIndex);
+    } else {
+      const hideTimer = setTimeout(() => {
+        setVisibleIndex(null);
+      }, 1000);
+      setTimerId(hideTimer);
+    }
+  }, [hoveredIndex]);
 
   const searchSuggestions = [
     "HSC 25 নতুন মুক্তির প্রস্তুতি ...",
@@ -45,280 +167,141 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3">
+    <nav className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 left-0">
       <div className="max-w-container mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="https://cdn.10minuteschool.com/images/svg/10mslogo-svg.svg"
-            alt="Logo"
-            width={100}
-            height={28}
-          />
-        </Link>
-
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md mx-8 relative" ref={searchDropdownRef}>
-          <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="27"
-              height="24"
-              fill="none"
-              viewBox="0 0 27 24"
-              className="absolute top-[7px] left-1.5"
-            >
-              <path fill="#fff" d="M0 0H26.514V23.99H0z"></path>
-              <path
-                fill="#111827"
-                d="M21.247 20.065l-2.83-2.82a6.59 6.59 0 001.407-4.078 6.657 6.657 0 10-6.657 6.657 6.59 6.59 0 004.077-1.407l2.82 2.83a.834.834 0 001.365-.271.833.833 0 00-.182-.911zM8.174 13.167a4.993 4.993 0 119.985 0 4.993 4.993 0 01-9.985 0z"
-              ></path>
-              <path
-                fill="#F1844C"
-                d="M3.875.975l1.238 1.807c.33.481.853.794 1.433.857l2.178.236-1.807 1.239c-.481.33-.794.852-.857 1.432l-.237 2.178-1.238-1.807a1.998 1.998 0 00-1.432-.857L.974 5.824l1.808-1.239c.48-.33.794-.853.857-1.432L3.875.975zM8.59 19.77l-.337.54a1.998 1.998 0 00-.21 1.656l.19.607-.54-.337a1.998 1.998 0 00-1.655-.21l-.607.19.337-.54c.308-.494.385-1.099.21-1.655l-.19-.607.54.337c.494.308 1.099.385 1.655.21l.607-.19zM23.575 6.068l.223 1.396c.092.576.43 1.083.927 1.388l1.205.74-1.396.222a1.998 1.998 0 00-1.388.928l-.74 1.204-.222-1.396a1.997 1.997 0 00-.927-1.387l-1.205-.74 1.396-.223a1.997 1.997 0 001.388-.927l.74-1.205z"
-              ></path>
-            </svg>
-            <input
-              type="text"
-              placeholder="স্কিলস কোর্স, কিংবা স্কুল প্রোগ্রাম সার্চ করুন..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none placeholder:text-sm "
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchDropdownOpen(true)}
+        <div className="flex items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="https://cdn.10minuteschool.com/images/svg/10mslogo-svg.svg"
+              alt="Logo"
+              width={100}
+              height={28}
             />
-          </div>
+          </Link>
 
-          {isSearchDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
-              <div className="p-3 border-b border-gray-100">
-                <span className="text-sm text-gray-600">
-                  জনপ্রিয় অনুসন্ধান
-                </span>
-              </div>
-              {searchSuggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-400 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <span className="text-sm text-gray-700">{suggestion}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation Items */}
-        <div className="flex items-center space-x-6 text-[15px]">
-          {/* Class 6-12 Dropdown */}
-          <div
-            className="relative"
-            ref={classDropdownRef}
-            onMouseEnter={() => setIsClassDropdownOpen(true)}
-            onMouseLeave={() => setIsClassDropdownOpen(false)}
-          >
-            <button className="flex items-center text-gray-700 hover:text-green-600 font-medium">
-              Class 6-12
+          {/* Search Bar */}
+          <div className="max-w-80 mx-8 relative" ref={searchDropdownRef}>
+            <div className="relative">
               <svg
-                className="ml-1 w-4 h-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="27"
+                height="24"
                 fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                viewBox="0 0 27 24"
+                className="absolute top-[7px] left-2.5"
               >
+                <path fill="#fff" d="M0 0H26.514V23.99H0z"></path>
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
+                  fill="#111827"
+                  d="M21.247 20.065l-2.83-2.82a6.59 6.59 0 001.407-4.078 6.657 6.657 0 10-6.657 6.657 6.59 6.59 0 004.077-1.407l2.82 2.83a.834.834 0 001.365-.271.833.833 0 00-.182-.911zM8.174 13.167a4.993 4.993 0 119.985 0 4.993 4.993 0 01-9.985 0z"
+                ></path>
+                <path
+                  fill="#F1844C"
+                  d="M3.875.975l1.238 1.807c.33.481.853.794 1.433.857l2.178.236-1.807 1.239c-.481.33-.794.852-.857 1.432l-.237 2.178-1.238-1.807a1.998 1.998 0 00-1.432-.857L.974 5.824l1.808-1.239c.48-.33.794-.853.857-1.432L3.875.975zM8.59 19.77l-.337.54a1.998 1.998 0 00-.21 1.656l.19.607-.54-.337a1.998 1.998 0 00-1.655-.21l-.607.19.337-.54c.308-.494.385-1.099.21-1.655l-.19-.607.54.337c.494.308 1.099.385 1.655.21l.607-.19zM23.575 6.068l.223 1.396c.092.576.43 1.083.927 1.388l1.205.74-1.396.222a1.998 1.998 0 00-1.388.928l-.74 1.204-.222-1.396a1.997 1.997 0 00-.927-1.387l-1.205-.74 1.396-.223a1.997 1.997 0 001.388-.927l.74-1.205z"
+                ></path>
               </svg>
-            </button>
+              <input
+                type="text"
+                placeholder="স্কিলস কোর্স, কিংবা স্কুল প্রোগ্রাম সার্চ করুন..."
+                className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none placeholder:text-sm "
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchDropdownOpen(true)}
+              />
+            </div>
 
-            {isClassDropdownOpen && (
-              <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-48 z-50">
-                {classOptions.map((option) => (
+            {isSearchDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
+                <div className="p-3 border-b border-gray-100">
+                  <span className="text-sm font-bold text-gray-600">
+                    জনপ্রিয় অনুসন্ধান
+                  </span>
+                </div>
+                {searchSuggestions.map((suggestion, index) => (
                   <div
-                    key={option.id}
-                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center"
+                    key={index}
+                    className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center"
                   >
-                    <div
-                      className="w-6 h-6 rounded-full mr-3 flex items-center justify-center text-white text-xs font-bold"
-                      style={{ backgroundColor: option.color }}
+                    <svg
+                      className="w-4 h-4 text-gray-400 mr-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {option.label === "HSC"
-                        ? "H"
-                        : option.label.split(" ")[1]?.[0] || option.label[0]}
-                    </div>
-                    <span className="text-gray-700">{option.label}</span>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <span className="text-sm text-gray-700">{suggestion}</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
+        </div>
 
-          {/* Skills Dropdown */}
-          <div
-            className="relative"
-            ref={skillsDropdownRef}
-            onMouseEnter={() => setIsSkillsDropdownOpen(true)}
-            onMouseLeave={() => setIsSkillsDropdownOpen(false)}
-          >
-            <button className="flex items-center text-gray-700 hover:text-green-600 font-medium">
-              Skills
-              <svg
-                className="ml-1 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
+        {/* Navigation Items */}
+        <div className="flex items-center space-x-6">
+          {/* Nav Items */}
+          <ul className="flex space-x-6 text-sm font-medium">
+            {(nextLang == "en" ? menuItemsBn : menuItemsEn).map(
+              (item, index) => (
+                <li
+                  key={index}
+                  className="relative"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => {
+                    setHoveredIndex(null);
+                    setVisibleIndex(null);
+                  }}
+                >
+                  <button className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer">
+                    {item.title}
+                    {item.dropdown && (
+                      <svg
+                        className="w-3 h-3 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    )}
+                  </button>
 
-            {isSkillsDropdownOpen && (
-              <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-48 z-50">
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">Programming</span>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">Design</span>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">Language</span>
-                </div>
-              </div>
+                  {/* Dropdown */}
+                  {visibleIndex === index && item.dropdown && (
+                    <ul className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+                      {item.dropdown.map((subItem, subIdx) => (
+                        <li key={subIdx}>
+                          <Link
+                            href="#"
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center text-white ${subItem.color}`}
+                            >
+                              {subItem.icon}
+                            </div>
+                            <span>{subItem.label}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
             )}
-          </div>
-
-          {/* Admission */}
-          <button className="text-gray-700 hover:text-green-600 font-medium">
-            Admission
-          </button>
-
-          {/* Online Batch Dropdown */}
-          <div
-            className="relative"
-            ref={onlineBatchDropdownRef}
-            onMouseEnter={() => setIsOnlineBatchDropdownOpen(true)}
-            onMouseLeave={() => setIsOnlineBatchDropdownOpen(false)}
-          >
-            <button className="flex items-center text-gray-700 hover:text-green-600 font-medium">
-              Online Batch
-              <svg
-                className="ml-1 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            {isOnlineBatchDropdownOpen && (
-              <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-48 z-50">
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">HSC Batch</span>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">SSC Batch</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* English Centre Dropdown */}
-          <div
-            className="relative"
-            ref={englishCentreDropdownRef}
-            onMouseEnter={() => setIsEnglishCentreDropdownOpen(true)}
-            onMouseLeave={() => setIsEnglishCentreDropdownOpen(false)}
-          >
-            <button className="flex items-center text-gray-700 hover:text-green-600 font-medium">
-              English Centre
-              <svg
-                className="ml-1 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            {isEnglishCentreDropdownOpen && (
-              <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-48 z-50">
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">IELTS</span>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">Spoken English</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* More Dropdown */}
-          <div
-            className="relative"
-            ref={moreDropdownRef}
-            onMouseEnter={() => setIsMoreDropdownOpen(true)}
-            onMouseLeave={() => setIsMoreDropdownOpen(false)}
-          >
-            <button className="flex items-center text-gray-700 hover:text-green-600 font-medium">
-              More
-              <svg
-                className="ml-1 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            {isMoreDropdownOpen && (
-              <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-48 z-50">
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">About Us</span>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                  <span className="text-gray-700">Contact</span>
-                </div>
-              </div>
-            )}
-          </div>
+          </ul>
 
           {/* Language Toggle */}
           <button
@@ -358,7 +341,7 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
           </button>
 
           {/* Phone Number */}
-          <div className="flex items-center text-green-600">
+          <div className="flex items-center text-primary">
             <svg
               className="w-4 h-4 mr-1"
               fill="currentColor"
@@ -370,7 +353,7 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
           </div>
 
           {/* Login Button */}
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium">
+          <button className="bg-primary cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-primary/90 font-medium">
             লগ-ইন
           </button>
         </div>
