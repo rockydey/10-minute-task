@@ -125,9 +125,28 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [visibleIndex, setVisibleIndex] = useState<number | null>(null);
-  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
-
+  const timerIdRef = useRef<NodeJS.Timeout | null>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = (index: number) => {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+      timerIdRef.current = null;
+    }
+    setHoveredIndex(index);
+    setVisibleIndex(index);
+  };
+
+  const handleMouseLeave = () => {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+    }
+    timerIdRef.current = setTimeout(() => {
+      setHoveredIndex(null);
+      setVisibleIndex(null);
+      timerIdRef.current = null;
+    }, 100);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -146,15 +165,10 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
   }, []);
 
   useEffect(() => {
-    if (timerId) clearTimeout(timerId);
-
     if (hoveredIndex !== null) {
       setVisibleIndex(hoveredIndex);
     } else {
-      const hideTimer = setTimeout(() => {
-        setVisibleIndex(null);
-      }, 1000);
-      setTimerId(hideTimer);
+      setVisibleIndex(null);
     }
   }, [hoveredIndex]);
 
@@ -253,11 +267,8 @@ const DesktopNavbar = ({ nextLang, switchLang }: DesktopNavbarProps) => {
                 <li
                   key={index}
                   className="relative"
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => {
-                    setHoveredIndex(null);
-                    setVisibleIndex(null);
-                  }}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={handleMouseLeave}
                 >
                   <button className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer">
                     {item.title}

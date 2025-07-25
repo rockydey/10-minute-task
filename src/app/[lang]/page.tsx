@@ -10,7 +10,7 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { lang: "en" | "bn" };
+  params: Promise<{ lang: "en" | "bn" }>;
 }) {
   const { lang } = await params;
   const data = await fetchProductData(lang);
@@ -23,7 +23,7 @@ export async function generateMetadata({
 export default async function ProductSSRPage({
   params,
 }: {
-  params: { lang: "en" | "bn" };
+  params: Promise<{ lang: "en" | "bn" }>;
 }) {
   const queryClient = getQueryClient();
   const { lang } = await params;

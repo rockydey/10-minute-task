@@ -6,7 +6,7 @@ export default async function LangLayout({
   params,
 }: {
   children: ReactNode;
-  params: { lang: "en" | "bn" };
+  params: Promise<{ lang: "en" | "bn" }>;
 }) {
   const { lang } = await params;
   return <LangWrapper lang={lang}>{children}</LangWrapper>;
