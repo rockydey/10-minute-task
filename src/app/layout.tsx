@@ -1,5 +1,4 @@
-// app/layout.tsx
-import ReactQueryProvider from "@/provider/ReactQueryProvider";
+import ReactQueryProvider from "@/provider/react-query-provider";
 import "./globals.css";
 import { ReactNode } from "react";
 

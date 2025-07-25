@@ -6,6 +6,8 @@ import Loading from "./loading";
 export default function ProductClientPage({ lang }: { lang: "en" | "bn" }) {
   const { data, isLoading } = useProductQuery(lang);
 
+  console.log(data);
+
   if (isLoading) return <Loading />;
 
   return (

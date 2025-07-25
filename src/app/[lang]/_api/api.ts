@@ -12,6 +12,6 @@ export async function fetchProductData(lang: "en" | "bn") {
 
   if (!res.ok) throw new Error("Failed to fetch");
 
-  const data = res.json();
+  const data = await res.json();
   return data;
 }

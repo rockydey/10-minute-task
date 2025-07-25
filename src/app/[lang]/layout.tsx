@@ -1,17 +1,13 @@
 import { ReactNode } from "react";
-import Header from "./_components/header";
+import LangWrapper from "./_components/lang-wrapper";
 
-export default function LangLayout({
+export default async function LangLayout({
   children,
   params,
 }: {
   children: ReactNode;
   params: { lang: "en" | "bn" };
 }) {
-  return (
-    <>
-      <Header currentLang={params.lang} />
-      {children}
-    </>
-  );
+  const { lang } = await params;
+  return <LangWrapper lang={lang}>{children}</LangWrapper>;
 }
